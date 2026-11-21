@@ -1,0 +1,139 @@
+name: Publish versioned release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - custom_components/unifi_air_quality/manifest.json
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish validated tag
+    if: github.repository == 'Daniel-Dietz/ha-unifi-air-quality' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    concurrency:
+      group: tagged-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      checks: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Check package metadata and prepare release notes
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import tomllib
+          from pathlib import Path
+
+          root = Path.cwd()
+          manifest = json.loads(
+              (root / "custom_components/unifi_air_quality/manifest.json").read_text()
+          )
+          project = tomllib.loads((root / "pyproject.toml").read_text())
+          version = manifest["version"]
+          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+              raise SystemExit("Invalid release version")
+          if project["project"]["version"] != version:
+              raise SystemExit("Manifest and project versions differ")
+          lines = (root / "CHANGELOG.md").read_text().splitlines()
+          headings = [i for i, line in enumerate(lines) if line.startswith("## ")]
+          matches = [i for i in headings if lines[i].startswith(f"## {version} ")]
+          if len(matches) != 1 or matches[0] != headings[0]:
+              raise SystemExit("Current version is not the first changelog section")
+          start = matches[0]
+          end = next((i for i in headings if i > start), len(lines))
+          notes = "\n".join(lines[start + 1 : end]).strip()
+          if not notes:
+              raise SystemExit("Empty release notes")
+          (Path(os.environ["RUNNER_TEMP"]) / "release-notes.md").write_text(notes + "\n")
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
+              env.write(f"RELEASE_TAG=v{version}\n")
+          print(f"Prepared immutable release v{version}")
+          PY
+      - name: Require four successful validation checks on this main commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          import time
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          sha = os.environ["GITHUB_SHA"]
+
+          def api(path):
+              return json.loads(
+                  subprocess.check_output(["gh", "api", path], text=True)
+              )
+
+          if api(f"/repos/{repo}/branches/main")["commit"]["sha"] != sha:
+              raise SystemExit("Refusing to release an obsolete main commit")
+          required = {
+              "Home Assistant 2026.10.4",
+              "Security scan",
+              "HACS validation",
+              "Hassfest validation",
+          }
+          for _ in range(100):
+              checks = api(f"/repos/{repo}/commits/{sha}/check-runs?per_page=100")
+              seen = {}
+              for run in checks["check_runs"]:
+                  if run["name"] in required:
+                      previous = seen.get(run["name"])
+                      if previous is None or run["id"] > previous["id"]:
+                          seen[run["name"]] = run
+              failed = {
+                  name: run.get("conclusion")
+                  for name, run in seen.items()
+                  if run["status"] == "completed" and run.get("conclusion") != "success"
+              }
+              if failed:
+                  raise SystemExit("Required validation failed: " + str(failed))
+              if required <= seen.keys() and all(
+                  seen[name]["status"] == "completed"
+                  and seen[name]["conclusion"] == "success"
+                  for name in required
+              ):
+                  print("All required checks passed for", sha)
+                  break
+              time.sleep(10)
+          else:
+              raise SystemExit("Timed out waiting for required validation")
+          PY
+      - name: Publish new tag and GitHub Release without retargeting
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_TAG"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            actual="$(gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq .object.sha)"
+            test "$actual" = "$GITHUB_SHA" || { echo "Existing tag points elsewhere"; exit 1; }
+            echo "Release already published at this commit"
+            exit 0
+          fi
+          if gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag already exists without a release; refusing to replace it"
+            exit 1
+          fi
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --title "$tag" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --latest
+          actual="$(gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq .object.sha)"
+          test "$actual" = "$GITHUB_SHA" || { echo "Published tag points elsewhere"; exit 1; }
+          echo "Published $tag at $actual"
