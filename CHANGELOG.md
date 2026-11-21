@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.6.1 — Protect alarm reconciliation and secret-history hardening
+
+- Filter unrelated Protect sensor alarms before UP-AirQuality metric validation,
+  preserving the strict schema checks for supported devices.
+- Fix races between concurrent HTTP bootstrap and WebSocket alarm starts/ends:
+  avoid replaying cached statuses over newly verified classifications.
+- Restore continuing, known alarm events after safety resync, maintaining
+  freshness and avoiding duplicate alarm-start notifications.
+- Secure the first introduction of the secret-history baseline: inherit only
+  exact accepted-base findings, reject PR-owned exemptions and detect newly
+  introduced secrets. Add comprehensive regression tests.
+- Preserve fork-specific metadata, branch protection, integration identity and
+  existing Home Assistant configuration/registry compatibility.
+- Publish the independently reviewed fixes as a versioned `v0.6.1` release.
+
+
 ## 0.6.0 — fork hardening (pinned-commit distribution)
 
 - Organize installation methods as Marketplace, HACS and manual download; expand

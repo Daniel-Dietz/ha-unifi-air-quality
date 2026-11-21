@@ -31,7 +31,7 @@ def test_fork_versions_are_consistent():
         (ROOT / "custom_components/unifi_air_quality/manifest.json").read_text()
     )
     version = manifest["version"]
-    assert project["project"]["version"] == version == "0.6.0"
+    assert project["project"]["version"] == version == "0.6.1"
     assert f"## {version} " in (ROOT / "CHANGELOG.md").read_text()
 
 
@@ -59,3 +59,15 @@ def test_ruleset_requires_actual_unique_job_contexts():
         15368
     }
     assert len(expected) == 4
+
+def test_release_publisher_runs_only_on_main_with_scoped_write_permission():
+    """Publishing is separate from read-only validation and never runs on PRs."""
+    workflow = yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
+    on = workflow.get("on", workflow.get(True))
+    assert on["push"]["branches"] == ["main"]
+    assert "pull_request" not in on
+    assert workflow["permissions"] == {"contents": "read"}
+    publish = workflow["jobs"]["publish"]
+    assert publish["permissions"] == {"contents": "write", "checks": "read"}
+    assert "refs/heads/main" in publish["if"]
+    assert "Daniel-Dietz/ha-unifi-air-quality" in publish["if"]

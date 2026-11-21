@@ -7,11 +7,12 @@ available, open an issue asking only for a private security contact; include no
 vulnerability details. See [GitHub's private reporting guide](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately). Do not open a public issue containing credentials or
 unredacted diagnostics.
 
-Security fixes target the latest accepted **pinned commit** of fork version
-0.6.0; unmerged candidates and moving-branch downloads are not reproducible
-supported builds. Record the full commit SHA alongside the installed manifest
-version, as described in [the install/rollback policy](docs/install-upgrade-rollback.md).
-No published fork release is claimed until an immutable release is created.
+Security fixes target the latest accepted **tagged release**, starting with
+`v0.6.1`. Unmerged candidates and moving-branch downloads are not supported
+builds. Record the release tag and full commit SHA alongside the installed
+manifest version, as described in the
+[install/rollback policy](docs/install-upgrade-rollback.md). Release tags
+are created only from validated main commits and are never retargeted.
 This integration is intended for local network access to Protect and must not
 be used to expose a console publicly.
 
@@ -37,8 +38,11 @@ digests weekly alongside Dependabot PRs, update their workflow pins and run the
 complete validators before merging. Image updates are maintainer-owned; the
 weekly workflow does not grant write access to create update PRs. Dependabot
 checks action and Python pins weekly at 09:00 Europe/Berlin. Review upstream
-changes and all CI results before merging its PRs. No workflow needs write permissions; checkout does not persist
-credentials in the Security job.
+changes and all CI results before merging its PRs. Tests, HACS, Hassfest and Security validation workflows retain read-only
+permissions; their checkout does not persist credentials. The separate
+main-branch-only release publisher has scoped `contents: write` and
+`checks: read` permissions to publish a release only after the four required
+checks pass for the same main commit. It refuses to retarget existing tags.
 
 `security-advisories.json` tracks individual accepted upstream advisories by exact
 package version, owner, reason and expiry. It currently records Pillow 12.3.0
