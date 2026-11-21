@@ -6,31 +6,27 @@ while retaining an existing Home Assistant setup.
 
 ## Supported distribution and identity
 
-The fork identifies this change set as **0.6.0** in `manifest.json`,
-`pyproject.toml` and `CHANGELOG.md`. Its supported distribution is an **immutable
-full commit**, accepted into `Daniel-Dietz/ha-unifi-air-quality` main after the
-Tests, Security, HACS and Hassfest jobs and independent review pass. The accepted
-PR/merge record identifies the full 40-character commit. Fixes target the latest
-accepted pinned commit; earlier commits must be upgraded to receive fixes.
-Feature branches and unmerged candidates are not supported deployments.
+The fork identifies this release as **0.6.1** in `manifest.json`,
+`pyproject.toml` and `CHANGELOG.md`. The supported package is the
+**`v0.6.1` GitHub Release**, pointing to one reviewed, validated main commit.
+The protected pull request must pass Tests, Security, HACS and Hassfest before
+merging; the release publisher checks those same four jobs on the accepted
+main commit. The release tag must never be retargeted. Feature branches
+and unmerged candidates are not supported deployments.
 
-A version number alone does not identify a commit. Record both `0.6.0` and the
-full accepted SHA, plus the Home Assistant version, in the installation notes.
-The installed component's `manifest.json` identifies the fork through its
-repository/issue links and reports `0.6.0`. The fixed ZIP linked from the README
-uses the full accepted commit in its download URL and original archive filename.
-Keep that ZIP with its original filename as the exact build record; users do not
-need Git or a manually created marker for this installation path. Include the
-archive filename and installed version in bug reports. The `BUILD_COMMIT` marker
-described below is an alternative for staged deployments that do not retain the
-archive. It contains the same public commit ID and no credentials.
+A version number alone does not identify a commit. Record the `v0.6.1` tag,
+its complete 40-character release commit SHA and the Home Assistant version
+in installation notes. The component's `manifest.json` identifies this fork
+and reports `0.6.1`. The ZIP linked from the README uses the version tag;
+keep the original ZIP and release SHA for recovery. The archive filename
+identifies the tag, not its commit. The optional `BUILD_COMMIT` marker below
+holds the same public commit ID for staged deployments without credentials.
 
-No published GitHub Release or release tag is claimed by this policy. Until a
-maintainer publishes an immutable release from an accepted commit, **HACS tracks
-the moving default branch** for a repository without releases. Use the pinned
-manual procedure for reproducible supported deployment. A future `v0.6.0`
-release must point to one accepted commit and never be retargeted; its release
-notes must link the final checks and upgrade/rollback evidence.
+Version `v0.6.1` is published from the accepted main commit by a restricted
+GitHub Actions workflow after four successful required checks for the same SHA.
+HACS can select the published tag rather than an unpinned moving branch.
+For reproducible recovery, retain package backups or use the pinned-commit
+manual instructions below. Existing release tags must never be moved or reused.
 
 Home Assistant **2026.10.4** is the minimum and the tested/audited baseline.
 Upgrade older HA installations first. That HA upgrade is a separate operation
@@ -57,7 +53,7 @@ with its own full backup; this component's rollback cannot downgrade HA itself.
    ```
 
    Confirm `rev-parse HEAD` equals the recorded full SHA and the staged manifest
-   says `0.6.0`. An equivalent immutable archive URL is
+   says `0.6.1`. An equivalent immutable archive URL is
    `https://github.com/Daniel-Dietz/ha-unifi-air-quality/archive/FULL_COMMIT_SHA.tar.gz`;
    replace the placeholder with the same accepted 40-character SHA. Keep the
    original archive filename containing that SHA, or record it in `BUILD_COMMIT`
@@ -109,17 +105,17 @@ removes the integration entries, devices and entities. It is not equivalent to
 the HACS package-only removal described above. Keep using Marketplace's update
 action for a Marketplace-managed copy.
 
-When immutable fork releases become available, HACS can manage the fork custom
-repository. Select a concrete release in HACS, record its SHA/version, and use
-its documented download/restart flow. Moving-branch HACS downloads do not provide
-the commit pin promised by the manual policy above.
+HACS can manage the fork custom repository using its published `v0.6.1`
+release. Select that version, record its SHA and use the documented
+download/restart flow. Moving-branch HACS downloads do not provide the same
+reproducible reference as a versioned release or manually pinned commit.
 
 ## Rollback
 
 Stop Home Assistant, replace the complete active component folder with the saved
 previous package (including its build marker, if present), and start HA. Preserve
 the config entry and `.storage`; do not delete/recreate entities. Confirm the
-same identity/customization checklist and readings. Version 0.6.0 keeps config
+same identity/customization checklist and readings. Version 0.6.1 keeps config
 entry schema version 1 and does not require a destructive data migration.
 
 The disposable test below checks preserved identities for its synthetic

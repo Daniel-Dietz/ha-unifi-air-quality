@@ -96,7 +96,8 @@ installed.
 3. Enter `https://github.com/Daniel-Dietz/ha-unifi-air-quality`, select
    **Integration** as the type, and select **Add**.
 4. Find and open **UniFi Protect Air Quality** from **Daniel-Dietz**.
-5. Select **Download** and confirm.
+5. Select **Download**, choose the published `v0.6.1` release if a version
+   selector is shown, and confirm.
 6. Restart Home Assistant and continue with the connection setup below.
 
 See [HACS custom repositories](https://www.hacs.xyz/docs/faq/custom_repositories/)
@@ -117,7 +118,7 @@ First, make sure you can copy folders into Home Assistant:
   using your host's file manager. Home Assistant apps are not available with
   Container.
 
-1. **[Download the installation ZIP](https://github.com/Daniel-Dietz/ha-unifi-air-quality/archive/cd24231406d6d65798f48400029ab4dc01c30b9e.zip)** and extract it.
+1. **[Download the installation ZIP](https://github.com/Daniel-Dietz/ha-unifi-air-quality/archive/refs/tags/v0.6.1.zip)** and extract it.
    Keep the ZIP with its original filename alongside your backup.
 2. Open your **Home Assistant configuration directory**, the folder containing
    `configuration.yaml`. On Home Assistant OS this is normally `/config`.
@@ -146,10 +147,11 @@ if you need help locating that folder.
 
 **Use only one installation method for this integration.** The fixed ZIP in
 Option 3 is covered by the [supported installation policy](docs/install-upgrade-rollback.md#supported-distribution-and-identity).
-Marketplace and HACS download moving repository contents; those unpinned
-packages are outside that support policy. These are optional download methods
-for users who choose to manage that limitation. Avoid having a package manager
-overwrite a manually maintained copy.
+The versioned `v0.6.1` GitHub Release gives HACS and manual downloads a
+stable package reference. Record the selected tag and release commit in your
+installation notes. Marketplace-managed installations follow Marketplace's
+own update flow. Avoid having a package manager overwrite a manually
+maintained copy.
 
 ## Connect Home Assistant to Protect
 
