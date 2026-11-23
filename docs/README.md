@@ -22,6 +22,7 @@ problems.
 | --- | --- |
 | [Contributing](../CONTRIBUTING.md) | Navigate the source, prepare a development environment, run the existing checks and document a contribution. |
 | [Main-branch ruleset](maintainer-ruleset.md) | Apply and check the review and required-check rules used for changes to this repository. |
+| [Release runbook](release-runbook.md) | Preserve published tags and verify native immutable releases and their signed attestations. |
 | [Integration artwork](../assets/branding/README.md) | Locate the source artwork and the local Home Assistant brand images. |
 | [Historical HACS readiness report](hacs-readiness.md) | Read the earlier upstream submission and compatibility record; it is not the current installation guide. |
 

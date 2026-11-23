@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - custom_components/unifi_air_quality/manifest.json
-      - .github/workflows/release.yml
   workflow_dispatch:
 
 permissions:
@@ -124,7 +123,8 @@ jobs:
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             actual="$(gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq .object.sha)"
             test "$actual" = "$GITHUB_SHA" || { echo "Existing tag points elsewhere"; exit 1; }
-            echo "Release already published at this commit"
+            python dev/verify_release.py "$GITHUB_REPOSITORY" "$tag" "$GITHUB_SHA"
+            echo "Release already published and verified at this commit"
             exit 0
           fi
           if gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
@@ -134,6 +134,5 @@ jobs:
           gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" --title "$tag" \
             --notes-file "$RUNNER_TEMP/release-notes.md" --latest
-          actual="$(gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq .object.sha)"
-          test "$actual" = "$GITHUB_SHA" || { echo "Published tag points elsewhere"; exit 1; }
-          echo "Published $tag at $actual"
+          python dev/verify_release.py "$GITHUB_REPOSITORY" "$tag" "$GITHUB_SHA"
+          echo "Published and verified $tag at $GITHUB_SHA"
