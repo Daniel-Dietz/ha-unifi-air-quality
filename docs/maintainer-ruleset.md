@@ -54,7 +54,9 @@ single-maintainer repository is operable; this does not waive the independent
 review process. Codex comments do not count as a GitHub approving review.
 
 Publish release tags only from an accepted main commit. Keep existing release
-names and tags immutable. Required-check name changes must update this file and
+names and tags immutable. The [release runbook](release-runbook.md) records the
+legacy tag ruleset and the native immutable-release policy for new versions.
+Required-check name changes must update this file and
 the live ruleset together after the replacement job has run successfully.
 
 ## Emergency change

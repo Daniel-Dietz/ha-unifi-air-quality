@@ -28,6 +28,18 @@ HACS can select the published tag rather than an unpinned moving branch.
 For reproducible recovery, retain package backups or use the pinned-commit
 manual instructions below. Existing release tags must never be moved or reused.
 
+On 2026-11-23 the repository's [legacy tag ruleset](https://github.com/Daniel-Dietz/ha-unifi-air-quality/rules/27943474)
+was read back as active for `refs/tags/v0.6.1`, blocking updates, deletion and
+non-fast-forward changes without bypass actors. The tag still resolves to
+`d3de6c7931d7fbbcc7cb5c4214a67f6ce7860971`. The published release API still
+reports `immutable: false`; this tag protection is not GitHub's native immutable
+release guarantee or an attestation for v0.6.1. The administrator confirmed
+that native release immutability was enabled for subsequent releases only.
+Use the recorded full commit and saved package for v0.6.1 recovery. For future
+releases, require the successful publisher verification of the exact commit,
+`immutable: true` and GitHub's signed release attestation. See the
+[release runbook](release-runbook.md) for evidence and recovery procedures.
+
 Home Assistant **2026.10.4** is the minimum and the tested/audited baseline.
 Upgrade older HA installations first. That HA upgrade is a separate operation
 with its own full backup; this component's rollback cannot downgrade HA itself.
